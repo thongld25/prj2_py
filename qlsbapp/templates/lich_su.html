@@ -19,10 +19,10 @@
             {% if s.id == r.sanbong_id %}
                 <td>{{ s.name }}</td>
                 <td>{{ s.price }}</td>
+                <td>{{ r.time_play }}</td>
+                <td>{{ r.created_date }}</td>
             {% endif %}
         {% endfor %}
-        <td>{{ r.time_play }}</td>
-        <td>{{ r.created_date }}</td>
     </tr>
     {% endfor %}
 </table>

@@ -11,9 +11,10 @@ def index():
     kw = request.args.get('keyword')
     page = request.args.get('page', 1)
     sanbongs = utils.load_sanbongs(kw=kw, page=int(page))
+    user = current_user
 
 
-    return render_template('index.html', sanbongs=sanbongs)
+    return render_template('index.html', sanbongs=sanbongs, user =user)
 
 
 @app.route('/register', methods=['get', 'post'])
@@ -65,6 +66,8 @@ def user_signin():
 def datsan(sb_id):
     sanbong_id = Sanbong.query.get(sb_id)
     user = current_user
+    if current_user.is_anonymous:
+        return redirect(url_for('user_signin'))
     err_msg = ''
     if request.method.__eq__('POST'):
         time_play = request.form.get('time_play')
