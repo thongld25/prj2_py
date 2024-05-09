@@ -1,0 +1,11 @@
+[{
+  "id": 1,
+  "name": "San bong so 1",
+  "price": 500000,
+  "image": "images/anh1.jpg"
+}, {
+  "id": 2,
+  "name": "San bong so 2",
+  "price": 500000,
+  "image": "images/anh2.jpg"
+}]

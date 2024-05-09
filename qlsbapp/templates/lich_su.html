@@ -1,0 +1,29 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Lịch sử đặt sân{% endblock %}
+
+{% block content %}
+<p1>Lịch sử đặt sân</p1>
+<table class="table">
+    <tr>
+        <th>Tên sân</th>
+        <th>Giá</th>
+        <th>Thời gian trận đấu</th>
+        <th>Thời gian đặt sân<th>
+
+    </tr>
+    {% for r in receipts %}
+    <tr>
+
+        {% for s in sanbongs %}
+            {% if s.id == r.sanbong_id %}
+                <td>{{ s.name }}</td>
+                <td>{{ s.price }}</td>
+            {% endif %}
+        {% endfor %}
+        <td>{{ r.time_play }}</td>
+        <td>{{ r.created_date }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

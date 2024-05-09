@@ -1,0 +1,14 @@
+*{
+    font-family:Tahoma;
+}
+
+h1.subject {
+    text-align:center;
+}
+
+
+
+table.sanbong {
+    border-collapse: collapse;
+    width: 100%;
+}

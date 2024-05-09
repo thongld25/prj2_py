@@ -1,0 +1,27 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Trang chủ{% endblock %}
+
+{% block content %}
+{% if sanbong_id %}
+<div class="col-md-12 col-xs-12" style="padding:10px">
+    <div class="card">
+        <img class="card-img-top" src="{{ url_for('static', filename=sanbong_id.image) }}" alt="{{ sanbong_id.name }}">
+        <div class="card-body">
+            <h4 class="card-title">{{ sanbong_id.name }}</h4>
+            <p class="card-text">{{ "{:,.1f}".format(sanbong_id.price) }} VND/h</p>
+<!--            <a href="{{ url_for('datsan', sb_id = sanbong_id.id) }}" class="btn btn-primary">Dat san</a>-->
+        </div>
+        <form method="post" action="{{ url_for('datsan', sb_id = sanbong_id.id) }}">
+            <div class="form-group">
+                <label for="time_play">Chọn thời gian:</label>
+                <input type="datetime-local" class="form-control" id="time_play" name="time_play" step="3600" onchange="setMinuteToZero(this)">
+            </div>
+            <input type="submit" value="Dat san" class="btn btn-primary">
+        </form>
+    </div>
+</div>
+{% else %}
+<p><i>Không có sân bóng nào!!!!</i></p>
+{% endif %}
+{% endblock %}
