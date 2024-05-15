@@ -14,10 +14,15 @@
             {% for sb in sanbongs %}
             <div class="col-md-6 col-xs-12" style="padding:10px">
                 <div class="card">
-                  <img class="card-img-top" src="{{ url_for('static', filename=sb.image) }}" alt="{{ sb.name }}">
+                  <div class="card-img-container" style="width: 100%; height: 300px; overflow: hidden;">
+                      <img class="card-img-top" src="{{ url_for('static', filename=sb.image) }}" alt="{{ sb.name }}" style="width: 100%; height: auto; object-fit: cover;">
+                  </div>
                   <div class="card-body">
                     <h4 class="card-title">{{ sb.name }}</h4>
-                    <p class="card-text">{{ "{:,.1f}".format(sb.price) }} VND/h</p>
+                    <p class="card-text">Giá: {{ "{:,.1f}".format(sb.price) }} VND/h</p>
+                    <p class="card-text">Kích thước: {{ sb.type_pitch }}</p>
+                    <p class="card-text">Mặt sân: {{ sb.surface_pitch }}</p>
+                    <p class="card-text">Địa chỉ: {{ sb.address }}</p>
                       <a href="{{ url_for('datsan', sb_id = sb.id) }}" class="btn btn-primary">Đặt sân</a>
                   </div>
                 </div>

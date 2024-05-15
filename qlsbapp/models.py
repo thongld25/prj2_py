@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Enum, DateTime, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, Float, Enum, DateTime, ForeignKey, Boolean, Date
 from sqlalchemy.orm import relationship
 from qlsbapp import db, app
 from datetime import datetime
@@ -10,9 +10,12 @@ class Sanbong(db.Model):
     __tablename__ = 'sanbong'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(50), nullable=False)
+    name = Column(String(50), nullable=False, unique=True)
     price = Column(Float, default=0)
     image = Column(String(100))
+    type_pitch = Column(String(50), nullable=False)
+    surface_pitch = Column(String(50), nullable=False)
+    address = Column(String(200), nullable=False)
     active = Column(Boolean, default=True)
     created_date = Column(DateTime, default=datetime.now())
     receipts = relationship('Receipt', backref='sanbong', lazy=True)
@@ -32,7 +35,8 @@ class User(db.Model, UserMixin):
     username = Column(String(50), nullable=False, unique=True)
     password = Column(String(50), nullable=False)
     avatar = Column(String(100))
-    email = Column(String(50))
+    email = Column(String(50), nullable=False, unique=True)
+    phone = Column(String(20), nullable=False, unique=True)
     active = Column(Boolean, default=True)
     joined_date = Column(DateTime, default=datetime.now())
     user_role = Column(Enum(UserRole), default=UserRole.USER)
@@ -46,7 +50,12 @@ class Receipt(db.Model):
     created_date = Column(DateTime, default=datetime.now())
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     sanbong_id = Column(Integer, ForeignKey(Sanbong.id), nullable=False)
-    time_play = Column(DateTime)
+    time_play = Column(Date, nullable=False)
+    time_frame = Column(String(50), nullable=False)
+    status = Column(String(50), nullable=False)
+
+    def __str__(self):
+        return self.name
 
 if __name__ == '__main__':
 
@@ -66,6 +75,7 @@ if __name__ == '__main__':
     #       "name": "San bong so 3",
     #       "price": 500000,
     #       "image": "images/anh1.jpg"
+
     #     }, {
     #       "id": 2,
     #       "name": "San bong so 4",

@@ -6,19 +6,46 @@
 {% if sanbong_id %}
 <div class="col-md-12 col-xs-12" style="padding:10px">
     <div class="card">
-        <img class="card-img-top" src="{{ url_for('static', filename=sanbong_id.image) }}" alt="{{ sanbong_id.name }}">
         <div class="card-body">
             <h4 class="card-title">{{ sanbong_id.name }}</h4>
-            <p class="card-text">{{ "{:,.1f}".format(sanbong_id.price) }} VND/h</p>
-<!--            <a href="{{ url_for('datsan', sb_id = sanbong_id.id) }}" class="btn btn-primary">Dat san</a>-->
+            <p class="card-text">Giá: {{ "{:,.1f}".format(sanbong_id.price) }} VND/h</p>
+            <p class="card-text">Kích thước: {{ sanbong_id.type_pitch }}</p>
+            <p class="card-text">Mặt sân: {{ sanbong_id.surface_pitch }}</p>
+            <p class="card-text">Địa chỉ: {{ sanbong_id.address }}</p>
         </div>
-        <form method="post" action="{{ url_for('datsan', sb_id = sanbong_id.id) }}">
-            <div class="form-group">
-                <label for="time_play">Chọn thời gian:</label>
-                <input type="datetime-local" class="form-control" id="time_play" name="time_play" step="3600" onchange="setMinuteToZero(this)">
-            </div>
-            <input type="submit" value="Dat san" class="btn btn-primary">
-        </form>
+        <div>
+            <form method="post" action="{{ url_for('datsan', sb_id = sanbong_id.id) }}">
+                <div class="form-group">
+                    <label for="time_play">Chọn ngày:</label>
+                    <input type="date" class="form-control" id="time_play" name="time_play">
+                </div>
+                <div>
+                    <label for="khung_gio">Chọn khung giờ:</label>
+                    <select id="khung_gio" name="khung_gio">
+                      <option value="07:00 - 08:00">07:00 - 08:00</option>
+                      <option value="08:00 - 09:00">08:00 - 09:00</option>
+                      <option value="09:00 - 10:00">09:00 - 10:00</option>
+                      <option value="10:00 - 11:00">10:00 - 11:00</option>
+                      <option value="11:00 - 12:00">11:00 - 12:00</option>
+                      <option value="12:00 - 13:00">12:00 - 13:00</option>
+                      <option value="13:00 - 14:00">13:00 - 14:00</option>
+                      <option value="14:00 - 15:00">14:00 - 15:00</option>
+                      <option value="15:00 - 16:00">15:00 - 16:00</option>
+                      <option value="16:00 - 17:00">16:00 - 17:00</option>
+                      <option value="17:00 - 18:00">17:00 - 18:00</option>
+                      <option value="18:00 - 19:00">18:00 - 19:00</option>
+                      <option value="19:00 - 20:00">19:00 - 20:00</option>
+                      <option value="20:00 - 21:00">20:00 - 21:00</option>
+                      <option value="21:00 - 22:00">21:00 - 22:00</option>
+                      <option value="22:00 - 23:00">22:00 - 23:00</option>
+                      <option value="23:00 - 24:00">23:00 - 24:00</option>
+
+                      <!-- Thêm các option khác tương tự tại đây -->
+                    </select>
+                </div>
+                <input type="submit" value="Đặt sân" class="btn btn-primary">
+            </form>
+        </div>
     </div>
 </div>
 {% else %}

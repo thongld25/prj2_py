@@ -1,0 +1,61 @@
+{% extends 'admin/base.html' %}
+
+{% block body %}
+{% if current_user.is_authenticated %}
+<div class="table-responsive-sm">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Tên người dùng</th> <!-- Thêm cột tên người dùng -->
+                <th>Tên sân</th>
+                <th>Giá</th>
+                <th>Kích thước</th>
+                <th>Mặt sân</th>
+                <th>Địa chỉ</th>
+                <th>Thời gian trận đấu</th>
+                <th>Thời gian đặt sân</th>
+                <th>Trạng thái</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in receipts %}
+            <tr>
+                {% set sanbong = sanbongs|selectattr("id", "equalto", r.sanbong_id)|first %}
+                {% set user = users|selectattr("id", "equalto", r.user_id)|first %}
+                <td>{{ user.name }}</td>
+                <td>{{ sanbong.name }}</td>
+                <td>{{ sanbong.price }}</td>
+                <td>{{ sanbong.type_pitch }}</td>
+                <td>{{ sanbong.surface_pitch }}</td>
+                <td>{{ sanbong.address }}</td>
+                <td>{{ r.time_frame }} {{ r.time_play }}</td>
+                <td>{{ r.created_date }}</td>
+                <td>
+                    <form action="{{ url_for('.confirm', receipt_id=r.id) }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-success btn-sm mx-1">Xác nhận</button>
+                    </form>
+                    <form action="{{ url_for('.cancel', receipt_id=r.id) }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger btn-sm mx-1">Hủy</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<h1 class="text-center text-danger">Đăng nhập quản trị</h1>
+<form method="post" action="{{ url_for('admin_signin') }}">
+    <div class="form-group">
+        <label for="username">Tài khoản</label>
+        <input type="text" class="form-control" id="username" name="username" required>
+    </div>
+    <div class="form-group">
+        <label for="pass">Mật khẩu</label>
+        <input type="password" class="form-control" id="pass" name="password">
+    </div>
+    <input type="submit" value="Đăng nhập" class="btn btn-danger">
+</form>
+
+{% endif %}
+{% endblock %}

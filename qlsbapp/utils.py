@@ -1,6 +1,6 @@
 import json, os
 from qlsbapp import app, db
-from qlsbapp.models import Sanbong, User, Receipt
+from qlsbapp.models import Sanbong, User, Receipt, UserRole
 import hashlib
 
 
@@ -45,15 +45,18 @@ def add_user(name, username, password, **kwargs):
                 username=username.strip(),
                 password=password,
                 email=kwargs.get('email'),
+                phone=kwargs.get('phone'),
                 avatar=kwargs.get('avatar'))
 
     db.session.add(user)
     db.session.commit()
 
-def add_receipt(user_id, sanbong_id, time_play):
+def add_receipt(user_id, sanbong_id, time_play, time_frame, status):
     receipt = Receipt(user_id=user_id,
                       sanbong_id=sanbong_id,
-                      time_play=time_play)
+                      time_play=time_play,
+                      time_frame=time_frame,
+                      status = status)
 
     db.session.add(receipt)
     db.session.commit()
@@ -61,15 +64,17 @@ def add_receipt(user_id, sanbong_id, time_play):
 
 
 
-def check_login(username, password):
+def check_login(username, password, role):
     if username and password:
         password = str(hashlib.md5(password.strip().encode('utf-8')).hexdigest())
 
         return User.query.filter(User.username.__eq__(username.strip()),
-                                 User.password.__eq__(password)).first()
+                                 User.password.__eq__(password),
+                                 User.user_role.__eq__(role)).first()
 
 def get_user_by_id(user_id):
     return User.query.get(user_id)
 
 def get_sanbong_by_id(sb_id):
     return Sanbong.query.get(sb_id)
+
