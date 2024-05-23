@@ -12,3 +12,17 @@ table.sanbong {
     border-collapse: collapse;
     width: 100%;
 }
+
+/* Make the navbar sticky */
+.navbar {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Highlight active nav-link */
+.nav-link.active {
+  font-weight: bold;
+  color: #ff0000 !important;
+}

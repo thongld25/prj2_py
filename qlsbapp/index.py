@@ -11,7 +11,7 @@ from qlsbapp.models import UserRole, Sanbong, User, Receipt
 def index():
     kw = request.args.get('keyword')
     page = request.args.get('page', 1)
-    sanbongs = utils.load_sanbongs(kw=kw, page=int(page))
+    sanbongs = Sanbong.query.filter_by(active = True)
     user = current_user
 
 
@@ -172,6 +172,7 @@ def cancel(receipt_id):
         receipt = Receipt.query.get_or_404(receipt_id)
         receipt.status = 'Đã hủy'
         db.session.commit()
+        flash('Đã hủy đặt sân thành công')
         return redirect(url_for('wait_confirm'))
 
 

@@ -35,7 +35,7 @@
                     <td>{{ r.created_date }}</td>
                     <td>
                         <form action="{{ url_for('.cancel', receipt_id=r.id) }}" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-danger btn-sm mx-1">Hủy</button>
+                            <button type="submit" class="btn btn-danger btn-sm mx-1" onclick="return confirm('Bạn có chắc chắn muốn hủy đặt sân không?');">Hủy</button>
                         </form>
                     </td>
                 </tr>

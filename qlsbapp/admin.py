@@ -17,7 +17,7 @@ class AuthenticatedModelView(ModelView):
 class SanbongView(BaseView):
     @expose('/')
     def index(self):
-        sanbongs = Sanbong.query.all()
+        sanbongs = Sanbong.query.filter_by(active = True)
         return self.render('admin/sanbong.html', sanbongs=sanbongs)
 
     @expose('/add', methods=('GET', 'POST'))
@@ -54,7 +54,7 @@ class SanbongView(BaseView):
     @expose('/delete/<int:id>', methods=('POST',))
     def delete(self, id):
         sanbong = Sanbong.query.get_or_404(id)
-        db.session.delete(sanbong)
+        sanbong.active = False
         db.session.commit()
         flash('Sân bóng đã được xóa!')
         return redirect(url_for('.index'))
@@ -65,7 +65,7 @@ class SanbongView(BaseView):
 class UserView(BaseView):
     @expose('/')
     def index(self):
-        users = User.query.all()
+        users = User.query.filter(User.user_role != UserRole.ADMIN)
         return self.render('admin/user.html', users=users)
 
     def is_accessible(self):
