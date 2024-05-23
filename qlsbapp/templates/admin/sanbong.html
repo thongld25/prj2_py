@@ -1,0 +1,59 @@
+{% extends 'admin/base.html' %}
+
+{% block body %}
+{% if current_user.is_authenticated %}
+<div class="mb-3">
+    <a href="{{ url_for('sanbongview.add') }}" class="btn btn-primary">Thêm sân bóng</a>
+</div>
+<div class="table-responsive-sm">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Tên sân bóng</th>
+                <th>Kích thước</th>
+                <th>Mặt sân</th>
+                <th>Giá</th>
+                <th>Địa chỉ</th>
+                <th>Địa chỉ lưu ảnh</th>
+                <th>Ngày tạo</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in sanbongs %}
+            <tr>
+                <td>{{ s.name }}</td>
+                <td>{{ s.type_pitch }}</td>
+                <td>{{ s.surface_pitch }}</td>
+                <td>{{ "{:,.1f}".format(s.price) }}</td>
+                <td>{{ s.address }}</td>
+                <td>{{ s.image }}</td>
+                <td>{{ s.created_date }}</td>
+                <td>
+                    <a href="{{ url_for('sanbongview.edit', id=s.id) }}" class="btn btn-secondary btn-sm">Sửa</a>
+                    <form action="{{ url_for('sanbongview.delete', id=s.id) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa sân bóng này?');">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<h1 class="text-center text-danger">Đăng nhập quản trị</h1>
+<form method="post" action="{{ url_for('admin_signin') }}">
+    <div class="form-group">
+        <label for="username">Tài khoản</label>
+        <input type="text" class="form-control" id="username" name="username" required>
+    </div>
+    <div class="form-group">
+        <label for="pass">Mật khẩu</label>
+        <input type="password" class="form-control" id="pass" name="password">
+    </div>
+    <input type="submit" value="Đăng nhập" class="btn btn-danger">
+</form>
+
+{% endif %}
+{% endblock %}
+

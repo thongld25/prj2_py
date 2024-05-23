@@ -3,6 +3,11 @@
 {% block title %}Trang chủ{% endblock %}
 
 {% block content %}
+{% if err_msg %}
+<div class="alert alert-danger">
+    <h4>{{ err_msg }}</h4>
+</div>
+{% endif %}
 {% if sanbong_id %}
 <div class="col-md-12 col-xs-12" style="padding:10px">
     <div class="card">

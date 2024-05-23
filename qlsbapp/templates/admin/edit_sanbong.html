@@ -1,0 +1,33 @@
+{% extends 'admin/base.html' %}
+
+{% block body %}
+<h1>Sửa sân bóng</h1>
+<form method="post">
+    <div class="form-group">
+        <label for="name">Tên sân bóng</label>
+        <input type="text" class="form-control" id="name" name="name" value="{{ sanbong.name }}" required>
+    </div>
+    <div class="form-group">
+        <label for="type_pitch">Kích thước</label>
+        <input type="text" class="form-control" id="type_pitch" name="type_pitch" value="{{ sanbong.type_pitch }}" required>
+    </div>
+    <div class="form-group">
+        <label for="surface_pitch">Mặt sân</label>
+        <input type="text" class="form-control" id="surface_pitch" name="surface_pitch" value="{{ sanbong.surface_pitch }}" required>
+    </div>
+    <div class="form-group">
+        <label for="price">Giá</label>
+        <input type="number" class="form-control" id="price" name="price" value="{{ sanbong.price }}" required>
+    </div>
+    <div class="form-group">
+        <label for="address">Địa chỉ</label>
+        <input type="text" class="form-control" id="address" name="address" value="{{ sanbong.address }}" required>
+    </div>
+    <div class="form-group">
+        <label for="image">Địa chỉ lưu ảnh</label>
+        <input type="text" class="form-control" id="image" name="image" value="{{ sanbong.image }}" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+    <a href="{{ url_for('sanbongview.index') }}" class="btn btn-secondary">Hủy</a>
+</form>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Đơn đặt sân đang chờ xác nhận{% endblock %}
+
+{% block content %}
+
+
+<h1>Đơn đặt sân đang chờ xác nhận</h1>
+<div class="table-responsive-sm">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Tên sân</th>
+                <th>Giá</th>
+                <th>Kích thước</th>
+                <th>Mặt sân</th>
+                <th>Địa chỉ</th>
+                <th>Thời gian trận đấu</th>
+                <th>Thời gian đặt sân</th>
+                <th>Trạng thái</th>
+<!--                <th>Hành động</th>-->
+            </tr>
+        </thead>
+        <tbody>
+        {% for r in receipts %}
+            {% if r.status == 'Chờ xác nhận' %}
+                <tr>
+                    {% set sanbong = sanbongs[r.sanbong_id] %}
+                    <td>{{ sanbong.name }}</td>
+                    <td>{{ sanbong.price }}</td>
+                    <td>{{ sanbong.type_pitch }}</td>
+                    <td>{{ sanbong.surface_pitch }}</td>
+                    <td>{{ sanbong.address }}</td>
+                    <td>{{ r.time_frame }} {{ r.time_play }}</td>
+                    <td>{{ r.created_date }}</td>
+                    <td>
+                        <form action="{{ url_for('.cancel', receipt_id=r.id) }}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger btn-sm mx-1">Hủy</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

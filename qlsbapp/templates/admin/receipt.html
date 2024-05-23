@@ -18,28 +18,28 @@
             </tr>
         </thead>
         <tbody>
-            {% for r in receipts %}
-            <tr>
-                {% set sanbong = sanbongs|selectattr("id", "equalto", r.sanbong_id)|first %}
-                {% set user = users|selectattr("id", "equalto", r.user_id)|first %}
-                <td>{{ user.name }}</td>
-                <td>{{ sanbong.name }}</td>
-                <td>{{ sanbong.price }}</td>
-                <td>{{ sanbong.type_pitch }}</td>
-                <td>{{ sanbong.surface_pitch }}</td>
-                <td>{{ sanbong.address }}</td>
-                <td>{{ r.time_frame }} {{ r.time_play }}</td>
-                <td>{{ r.created_date }}</td>
-                <td>
-                    <form action="{{ url_for('.confirm', receipt_id=r.id) }}" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-success btn-sm mx-1">Xác nhận</button>
-                    </form>
-                    <form action="{{ url_for('.cancel', receipt_id=r.id) }}" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-danger btn-sm mx-1">Hủy</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
+                {% for r in receipts %}
+                <tr>
+                    {% set sanbong = sanbongs|selectattr("id", "equalto", r.sanbong_id)|first %}
+                    {% set user = users|selectattr("id", "equalto", r.user_id)|first %}
+                    <td>{{ user.name }}</td>
+                    <td>{{ sanbong.name }}</td>
+                    <td>{{ sanbong.price }}</td>
+                    <td>{{ sanbong.type_pitch }}</td>
+                    <td>{{ sanbong.surface_pitch }}</td>
+                    <td>{{ sanbong.address }}</td>
+                    <td>{{ r.time_frame }} {{ r.time_play }}</td>
+                    <td>{{ r.created_date }}</td>
+                    <td>
+                        <form action="{{ url_for('.confirm', receipt_id=r.id) }}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-success btn-sm mx-1">Xác nhận</button>
+                        </form>
+                        <form action="{{ url_for('.canceled', receipt_id=r.id) }}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger btn-sm mx-1">Hủy</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
         </tbody>
     </table>
 </div>

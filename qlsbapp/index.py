@@ -18,10 +18,15 @@ def index():
     return render_template('index.html', sanbongs=sanbongs, user =user)
 
 
-@app.route('/register', methods=['get', 'post'])
+@app.route('/register', methods=['GET', 'POST'])
 def user_register():
     err_msg = ""
-    if request.method.__eq__('POST'):
+    name = ""
+    email = ""
+    phone = ""
+    username = ""
+
+    if request.method == 'POST':
         name = request.form.get('name')
         email = request.form.get('email')
         phone = request.form.get('phone')
@@ -34,7 +39,7 @@ def user_register():
             if User.query.filter(User.email == email).first() is None:
                 if User.query.filter(User.phone == phone).first() is None:
                     if User.query.filter(User.username == username).first() is None:
-                        if password.strip().__eq__(confirm.strip()):
+                        if password.strip() == confirm.strip():
                             avatar = request.files.get('avatar')
                             if avatar:
                                 res = cloudinary.uploader.upload(avatar)
@@ -56,7 +61,8 @@ def user_register():
         except Exception as ex:
             err_msg = 'Hệ thống có lỗi' + str(ex)
 
-    return render_template('register.html', err_msg=err_msg)
+    return render_template('register.html', err_msg=err_msg, name=name, email=email, phone=phone, username=username)
+
 
 @app.route('/user_login', methods=['get', 'post'])
 def user_signin():
@@ -100,11 +106,16 @@ def datsan(sb_id):
     if request.method.__eq__('POST'):
         time_play = request.form.get('time_play')
         time_frame = request.form.get('khung_gio')
+        # r =  Receipt.query.filter(Receipt.time_play == time_play, Receipt.time_frame == time_frame).first()
+        # print(r.time_play)
+        # print(time_play)
+
         try:
             if Receipt.query.filter(Receipt.time_play == time_play, Receipt.time_frame == time_frame).first() is None:
                 utils.add_receipt(user_id=current_user.id, sanbong_id=sb_id, time_play=time_play, time_frame=time_frame, status='Chờ xác nhận')
-                return redirect(url_for('lich_su'))
+                return redirect(url_for('wait_confirm'))
             else:
+                print('123')
                 err_msg = 'Giờ này đã được đặt'
         except Exception as ex:
             err_msg = 'Hệ thống có lỗi' + str(ex)
@@ -125,6 +136,17 @@ def user_signout():
 def lich_su():
     user_id = current_user.id
     receipts = utils.load_receipt(user_id)
+    sanbongs = []
+    for r in receipts:
+        sanbong = utils.get_sanbong_by_id(r.sanbong_id)
+        sanbongs.append(sanbong)
+
+    return render_template('lich_su.html', receipts=receipts, sanbongs=sanbongs)
+
+@app.route('/wait_confirm', methods=['get', 'post'])
+def wait_confirm():
+    user_id = current_user.id
+    receipts = utils.load_receipt(user_id)
     # for receipt in receipts:
     #     print(receipt.user_id)
     # sanbong_id = receipt.sanbong_id
@@ -143,15 +165,15 @@ def lich_su():
     #     db.session.commit()
     #     flash('Đơn hàng đã được hủy thành công.', 'success')
 
-    return render_template('lich_su.html', receipts=receipts, sanbongs=sanbongs)
-    return "Hello world"
+    return render_template('wait_confirm.html', receipts=receipts, sanbongs=sanbongs)
 
-# @app.route('/cancel/<int:receipt_id>', methods=['POST'])
-# def cancel(receipt_id):
-#     receipt = Receipt.query.get_or_404(receipt_id)
-#     receipt.status = 'Đã hủy'
-#     db.session.commit()
-#     return redirect(url_for('your_blueprint_name.lichsu'))  # Thay 'your_blueprint_name' bằng tên blueprint thực tế của bạn nếu sử dụng
+@app.route('/cancel/<int:receipt_id>', methods=['POST'])
+def cancel(receipt_id):
+        receipt = Receipt.query.get_or_404(receipt_id)
+        receipt.status = 'Đã hủy'
+        db.session.commit()
+        return redirect(url_for('wait_confirm'))
+
 
 
 @app.route("/sanbong")
