@@ -26,3 +26,15 @@ table.sanbong {
   font-weight: bold;
   color: #ff0000 !important;
 }
+
+.table-fixed {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.fixed-width {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 150px; /* Bạn có thể điều chỉnh độ rộng phù hợp */
+}

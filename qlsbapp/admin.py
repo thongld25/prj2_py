@@ -22,6 +22,12 @@ class SanbongView(BaseView):
 
     @expose('/add', methods=('GET', 'POST'))
     def add(self):
+        name = ""
+        type_pitch = ""
+        surface_pitch = ""
+        price = ""
+        address = ""
+        image = ""
         if request.method == 'POST':
             name = request.form['name']
             type_pitch = request.form['type_pitch']
@@ -29,11 +35,14 @@ class SanbongView(BaseView):
             price = request.form['price']
             address = request.form['address']
             image = request.form['image']
-            new_sanbong = Sanbong(name=name, type_pitch=type_pitch, surface_pitch=surface_pitch, price=price, address=address, image=image)
-            db.session.add(new_sanbong)
-            db.session.commit()
-            flash('Sân bóng đã được thêm thành công!')
-            return redirect(url_for('.index'))
+            if Sanbong.query.filter_by(name=name).first() != None:
+                flash('Tên sân bóng đã tồn tại!', 'error')
+            else:
+                new_sanbong = Sanbong(name=name, type_pitch=type_pitch, surface_pitch=surface_pitch, price=price, address=address, image=image)
+                db.session.add(new_sanbong)
+                db.session.commit()
+                flash('Sân bóng đã được thêm thành công!')
+                return redirect(url_for('.index'))
         return self.render('admin/add_sanbong.html')
 
     @expose('/edit/<int:id>', methods=('GET', 'POST'))
@@ -67,6 +76,18 @@ class UserView(BaseView):
     def index(self):
         users = User.query.filter(User.user_role != UserRole.ADMIN)
         return self.render('admin/user.html', users=users)
+
+    @expose('/profile_user/<int:u_id>', methods=['get'])
+    def profile_user(self, u_id):
+        user = User.query.get_or_404(u_id)
+        receipts = Receipt.query.filter_by(user_id=u_id).all()
+        sanbongs = []
+        for r in receipts:
+            sanbong = Sanbong.query.get(r.sanbong_id)
+            sanbongs.append(sanbong)
+
+        return self.render('admin/profile_user.html', receipts=receipts, user=user, sanbongs=sanbongs)
+
 
     def is_accessible(self):
         return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN

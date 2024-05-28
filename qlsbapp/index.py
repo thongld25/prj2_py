@@ -1,9 +1,10 @@
 from flask import render_template, request, redirect, url_for, session, flash
 from qlsbapp import app, login_manager, db
-import utils
+import utils, hashlib
 import cloudinary.uploader
 from flask_login import login_user, logout_user, current_user
 from qlsbapp.models import UserRole, Sanbong, User, Receipt
+from werkzeug.security import  check_password_hash, generate_password_hash
 
 
 
@@ -181,6 +182,67 @@ def cancel(receipt_id):
 def sanbong_list():
     sanbong = utils.load_sanbongs()
     return render_template('sanbong.html', sanbong=sanbong)
+
+@app.route('/profile', methods=['GET', 'POST'])
+def edit_profile():
+    user = current_user
+    if request.method == 'POST':
+        err_msg = ""
+        name = request.form.get('name')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        username = request.form.get('username')
+
+        try:
+            if User.query.filter(User.email == email).first() is None or user.email == email:
+                if User.query.filter(User.phone == phone).first() is None or user.phone == phone:
+                    if User.query.filter(User.username == username).first() is None or user.username == username:
+                        user.name = name
+                        user.email = email
+                        user.phone = phone
+                        user.username = username
+                        db.session.commit()
+                        flash('Đã chỉnh sửa thông tin thành công!', 'success')
+                        return redirect(url_for('edit_profile'))
+                    else:
+                        err_msg = 'Tên tài khoản đã tồn tại'
+                else:
+                    err_msg = 'Số điện thoại đã tồn tại'
+            else:
+                err_msg = 'Email đã tồn tại'
+        except Exception as ex:
+            err_msg = 'Hệ thống có lỗi: ' + str(ex)
+            flash(err_msg, 'danger')
+
+    return render_template('edit_profile.html', user=user)
+
+@app.route('/change_password', methods= ['get', 'post'])
+def change_password():
+    user = current_user
+    if request.method == 'POST':
+        err_msg = ''
+        current = request.form.get('current')
+        password = request.form.get('password')
+        confirm = request.form.get('confirm')
+        current = str(hashlib.md5(current.strip().encode('utf-8')).hexdigest())
+        if user.password == current:
+            print('123434')
+            if password == confirm:
+                password = password = str(hashlib.md5(password.strip().encode('utf-8')).hexdigest())
+                user.password = password
+                db.session.commit()
+                print(123)
+                flash('Đổi mật khẩu thành công', 'success')
+                return redirect(url_for('index'))
+            else:
+                err_msg = 'Mật khẩu không khớp!'
+        else:
+            err_msg = 'Mật khẩu hiện tại không đúng!'
+        flash(err_msg, 'error')
+
+    return render_template('change_password.html', user=user)
+
+
 
 if __name__ == '__main__':
     from qlsbapp.admin import *

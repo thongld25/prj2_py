@@ -5,27 +5,27 @@
 <form method="post">
     <div class="form-group">
         <label for="name">Tên sân bóng</label>
-        <input type="text" class="form-control" id="name" name="name" required>
+        <input type="text" class="form-control" id="name" name="name" value="{{ request.form.name or name }}" required>
     </div>
     <div class="form-group">
         <label for="type_pitch">Kích thước</label>
-        <input type="text" class="form-control" id="type_pitch" name="type_pitch" required>
+        <input type="text" class="form-control" id="type_pitch" name="type_pitch" value="{{ request.form.type_pitch or type_pitch }}" required>
     </div>
     <div class="form-group">
         <label for="surface_pitch">Mặt sân</label>
-        <input type="text" class="form-control" id="surface_pitch" name="surface_pitch" required>
+        <input type="text" class="form-control" id="surface_pitch" name="surface_pitch" value="{{ request.form.surface_pitch or surface_pitch }}" required>
     </div>
     <div class="form-group">
         <label for="price">Giá</label>
-        <input type="number" class="form-control" id="price" name="price" required>
+        <input type="number" class="form-control" id="price" name="price" value="{{ request.form.price or price }}" required>
     </div>
     <div class="form-group">
         <label for="address">Địa chỉ</label>
-        <input type="text" class="form-control" id="address" name="address" required>
+        <input type="text" class="form-control" id="address" name="address" value="{{ request.form.address or address }}" required>
     </div>
     <div class="form-group">
         <label for="image">Địa chỉ lưu ảnh</label>
-        <input type="text" class="form-control" id="image" name="image" required>
+        <input type="text" class="form-control" id="image" name="image" value="{{ request.form.image or image }}" required>
     </div>
     <button type="submit" class="btn btn-primary">Thêm</button>
     <a href="{{ url_for('sanbongview.index') }}" class="btn btn-secondary">Hủy</a>

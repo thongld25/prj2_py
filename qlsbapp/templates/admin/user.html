@@ -16,7 +16,7 @@
         <tbody>
             {% for u in users %}
             <tr>
-                <td>{{ u.name }}</td>
+                <td><a href="{{ url_for('userview.profile_user', u_id = u.id) }}">{{ u.name }}</a> </td>
                 <td>{{ u.email }}</td>
                 <td>{{ u.phone }}</td>
                 <td>{{ u.username }}</td>
