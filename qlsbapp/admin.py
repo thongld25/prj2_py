@@ -5,7 +5,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user, logout_user
 from flask import redirect, render_template, url_for, request, flash
 
-admin = Admin(app=app, name="QLSB Admin", template_mode='bootstrap4')
+admin = Admin(app=app, name="Quản lý sân bóng", template_mode='bootstrap4')
 
 class AuthenticatedModelView(ModelView):
     # list_template = 'admin/list.html'
@@ -140,9 +140,37 @@ class AllReceiptView(BaseView):
     def is_accessible(self):
         return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN
 
+class ThanhToanView(BaseView):
+    @expose('/')
+    def index(self):
+        receipts = Receipt.query.filter_by(status='Đặt thành công').all()
+        users = User.query.all()
+        sanbongs = Sanbong.query.all()
+        return self.render('admin/chuathanhtoan.html', receipts=receipts, users=users, sanbongs=sanbongs)
+
+    @expose('/confirm/<int:receipt_id>', methods=['POST'])
+    def confirm(self, receipt_id):
+        receipt = Receipt.query.get_or_404(receipt_id)
+        receipt.status = 'Đã thanh toán'
+        db.session.commit()
+        return redirect(url_for('.index'))
+
+    @expose('/canceled/<int:receipt_id>', methods=['POST'])
+    def canceled(self, receipt_id):
+        receipt = Receipt.query.get_or_404(receipt_id)
+        receipt.status = 'Bùng'
+        db.session.commit()
+        return redirect(url_for('.index'))
+
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN
+
+
+
 admin.add_view(UserView(name='Người Dùng'))
 # admin.add_view(ReceiptView(Receipt, db.session, name='Đơn hàng'))
 admin.add_view(AllReceiptView(name='Tất cả đơn hàng'))
 admin.add_view(SanbongView(name='Sân bóng'))
 admin.add_view(ReceiptView(name='Đơn hàng'))
 admin.add_view(LogoutView(name='Đăng xuất'))
+admin.add_view(ThanhToanView(name='Chưa thanh toán'))
