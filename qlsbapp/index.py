@@ -82,9 +82,11 @@ def user_signin():
     return render_template('login.html', err_msg=err_msg)
 
 
-@app.route('/admin-login', methods=['post'])
+@app.route('/admin_signin', methods=['POST'])
 def admin_signin():
         # if not current_user.user_role == UserRole.ADMIN:
+        print("admin_signin route called")
+        print("Request method:", request.method)
         username = request.form['username']
         password = request.form['password']
 
@@ -247,3 +249,4 @@ def change_password():
 if __name__ == '__main__':
     from qlsbapp.admin import *
     app.run(debug=True)
+

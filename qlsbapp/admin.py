@@ -1,11 +1,12 @@
 from qlsbapp import app, db
-from flask_admin import Admin, BaseView, expose
+from flask_admin import Admin, BaseView, expose, AdminIndexView
 from qlsbapp.models import Sanbong, UserRole, User, Receipt
 from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user, logout_user
-from flask import redirect, render_template, url_for, request, flash
+from flask import redirect, render_template, url_for, request, flash, jsonify
+from datetime import datetime, timedelta
+from sqlalchemy.sql import func
 
-admin = Admin(app=app, name="Quản lý sân bóng", template_mode='bootstrap4')
 
 class AuthenticatedModelView(ModelView):
     # list_template = 'admin/list.html'
@@ -13,6 +14,52 @@ class AuthenticatedModelView(ModelView):
     # edit_template = 'admin/edit.html'
     def is_accessible(self):
         return current_user.is_authenticated and current_user.user_role.__eq__(UserRole.ADMIN)
+
+class HomeAdminView(AdminIndexView):
+    @expose('/')
+    def index(self):
+        # if not current_user.is_authenticated:
+        #     return redirect(url_for('admin_signin'))
+        sanbongs = Sanbong.query.all()
+
+        return self.render('admin/index.html', sanbongs=sanbongs)
+
+    @expose('/thongke', methods=['POST'])
+    def thongke(self):
+        if not current_user.is_authenticated:
+            return redirect(url_for('admin_signin'))
+
+        data = request.get_json()
+        time_period = data.get('thoigianthongke')
+        san_bong_id = data.get('san_bong')
+
+        query = Receipt.query.filter_by(status='Đã thanh toán')
+
+        if san_bong_id != 'all':
+            query = query.filter_by(sanbong_id=san_bong_id)
+
+        if time_period == 'day':
+            query = query.filter(func.date(Receipt.created_date) == func.current_date())
+        elif time_period == 'week':
+            query = query.filter(func.date(Receipt.created_date) >= func.current_date() - timedelta(days=7))
+        elif time_period == 'month':
+            query = query.filter(func.date(Receipt.created_date) >= func.current_date() - timedelta(days=30))
+        elif time_period == 'year':
+            query = query.filter(func.date(Receipt.created_date) >= func.current_date() - timedelta(days=365))
+
+        total_revenue = 0
+        for receipt in query:
+            total_revenue += receipt.sanbong.price
+
+        return jsonify(total_revenue=total_revenue)
+
+    # def is_accessible(self):
+    #     return current_user.is_authenticated and current_user.user_role.__eq__(UserRole.ADMIN)
+
+admin = Admin(app=app, name="Quản lý sân bóng",index_view=HomeAdminView(name='Trang chủ'), template_mode='bootstrap4')
+
+
+
 
 class SanbongView(BaseView):
     @expose('/')
@@ -87,7 +134,6 @@ class UserView(BaseView):
             sanbongs.append(sanbong)
 
         return self.render('admin/profile_user.html', receipts=receipts, user=user, sanbongs=sanbongs)
-
 
     def is_accessible(self):
         return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN
@@ -165,12 +211,39 @@ class ThanhToanView(BaseView):
     def is_accessible(self):
         return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN
 
+class DanhsachdenView(BaseView):
+    @expose('/')
+    def index(self):
+        subquery = db.session.query(
+            Receipt.user_id,
+            func.count(Receipt.id).label('bung_count')
+        ).filter(
+            Receipt.status == 'Bùng'
+        ).group_by(
+            Receipt.user_id
+        ).subquery()
 
+        # Tạo truy vấn để lấy thông tin người dùng có số lượng biên lai 'Bùng' >= 5
+        query = db.session.query(
+            User,
+            subquery.c.bung_count
+        ).join(
+            subquery,
+            User.id == subquery.c.user_id
+        ).filter(
+            subquery.c.bung_count >= 5
+        ).all()
+
+        return self.render('admin/blacklist.html', users=query)
+
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN
 
 admin.add_view(UserView(name='Người Dùng'))
+admin.add_view(SanbongView(name='Sân bóng'))
 # admin.add_view(ReceiptView(Receipt, db.session, name='Đơn hàng'))
 admin.add_view(AllReceiptView(name='Tất cả đơn hàng'))
-admin.add_view(SanbongView(name='Sân bóng'))
 admin.add_view(ReceiptView(name='Đơn hàng'))
-admin.add_view(LogoutView(name='Đăng xuất'))
 admin.add_view(ThanhToanView(name='Chưa thanh toán'))
+admin.add_view(DanhsachdenView(name='Danh sách đen'))
+admin.add_view(LogoutView(name='Đăng xuất'))
