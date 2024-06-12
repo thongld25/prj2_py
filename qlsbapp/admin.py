@@ -1,3 +1,5 @@
+from sqlalchemy import Float
+
 from qlsbapp import app, db
 from flask_admin import Admin, BaseView, expose, AdminIndexView
 from qlsbapp.models import Sanbong, UserRole, User, Receipt
@@ -5,7 +7,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user, logout_user
 from flask import redirect, render_template, url_for, request, flash, jsonify
 from datetime import datetime, timedelta
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, extract
 
 
 class AuthenticatedModelView(ModelView):
@@ -15,17 +17,62 @@ class AuthenticatedModelView(ModelView):
     def is_accessible(self):
         return current_user.is_authenticated and current_user.user_role.__eq__(UserRole.ADMIN)
 
+# class HomeAdminView(AdminIndexView):
+#     @expose('/')
+#     def index(self):
+#         # if not current_user.is_authenticated:
+#         #     return redirect(url_for('admin_signin'))
+#         sanbongs = Sanbong.query.all()
+#
+#         return self.render('admin/index.html', sanbongs=sanbongs)
+#
+
+
+
 class HomeAdminView(AdminIndexView):
     @expose('/')
     def index(self):
-        # if not current_user.is_authenticated:
-        #     return redirect(url_for('admin_signin'))
         sanbongs = Sanbong.query.all()
-
         return self.render('admin/index.html', sanbongs=sanbongs)
+
+    @expose('/sales_data')
+    def sales_data(self):
+        # Fetch total sales per month
+        total_sales_per_month = db.session.query(
+            func.extract('month', Receipt.created_date).label('month'),
+            func.sum(Sanbong.price).label('total_sales')
+        ).join(Sanbong, Sanbong.id == Receipt.sanbong_id).filter(
+            Receipt.status == 'Đã Thanh Toán'
+        ).group_by('month').all()
+
+        # Fetch sales per month for each football field
+        sales_per_field_per_month = db.session.query(
+            Sanbong.name.label('field_name'),
+            func.extract('month', Receipt.created_date).label('month'),
+            func.sum(Sanbong.price).label('field_sales')
+        ).join(Sanbong, Sanbong.id == Receipt.sanbong_id).filter(
+            Receipt.status == 'Đã Thanh Toán'
+        ).group_by(Sanbong.name, 'month').all()
+
+        # Format data for Chart.js
+        data = {
+            'total_sales': {month: 0 for month in range(1, 13)},
+            'fields': {}
+        }
+
+        for sale in total_sales_per_month:
+            data['total_sales'][int(sale.month)] = float(sale.total_sales)
+
+        for sale in sales_per_field_per_month:
+            if sale.field_name not in data['fields']:
+                data['fields'][sale.field_name] = {month: 0 for month in range(1, 13)}
+            data['fields'][sale.field_name][int(sale.month)] = float(sale.field_sales)
+
+        return jsonify(data)
 
     @expose('/thongke', methods=['POST'])
     def thongke(self):
+        print(func.count(Sanbong.type_pitch))
         if not current_user.is_authenticated:
             return redirect(url_for('admin_signin'))
 
@@ -53,10 +100,28 @@ class HomeAdminView(AdminIndexView):
 
         return jsonify(total_revenue=total_revenue)
 
+    @expose('/revenue_data', methods=['GET'])
+    def revenue_data(self):
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+
+        sales_data = db.session.query(
+            Sanbong.name,
+            func.sum(Sanbong.price).label('total_sales')
+        ).join(Receipt).filter(
+            Receipt.status == 'Đã Thanh Toán',
+            Receipt.time_play >= start_date,
+            Receipt.time_play <= end_date
+        ).group_by(Sanbong.name).all()
+
+        sales_data = [{'sanbong': name, 'total_sales': total_sales} for name, total_sales in sales_data]
+
+        return jsonify(sales_data)
     # def is_accessible(self):
     #     return current_user.is_authenticated and current_user.user_role.__eq__(UserRole.ADMIN)
-
-admin = Admin(app=app, name="Quản lý sân bóng",index_view=HomeAdminView(name='Trang chủ'), template_mode='bootstrap4')
 
 
 
@@ -239,6 +304,7 @@ class DanhsachdenView(BaseView):
     def is_accessible(self):
         return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN
 
+admin = Admin(app=app, name="Quản lý sân bóng",index_view=HomeAdminView(name='Trang chủ'), template_mode='bootstrap4')
 admin.add_view(UserView(name='Người Dùng'))
 admin.add_view(SanbongView(name='Sân bóng'))
 # admin.add_view(ReceiptView(Receipt, db.session, name='Đơn hàng'))

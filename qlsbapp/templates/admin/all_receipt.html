@@ -30,7 +30,7 @@
                 <td>{{ sanbong.address }}</td>
                 <td>{{ r.time_frame }} {{ r.time_play }}</td>
                 <td>{{ r.created_date }}</td>
-                <td class="{% if r.status == 'Chờ xác nhận' %}text-warning{% elif r.status == 'Đặt thành công' %}text-success{% elif r.status == 'Đã bị hủy' %}text-danger{% endif %}">
+                <td class="{% if r.status == 'Chờ xác nhận' %}text-warning{% elif r.status == 'Đặt thành công' or r.status == 'Đã thanh toán' %}text-success{% elif r.status == 'Đã bị hủy' or r.status == 'Đã hủy' or r.status == 'Bùng' %}text-danger{% endif %}">
                     {{ r.status }}
                 </td>
             </tr>

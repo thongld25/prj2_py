@@ -1,4 +1,7 @@
 import json, os
+
+from sqlalchemy import func
+
 from qlsbapp import app, db
 from qlsbapp.models import Sanbong, User, Receipt, UserRole
 import hashlib
@@ -78,3 +81,20 @@ def get_user_by_id(user_id):
 def get_sanbong_by_id(sb_id):
     return Sanbong.query.get(sb_id)
 
+
+def receipt_stats(kw=None, from_date=None, to_date=None):
+    query = db.session.query(
+        Sanbong.id,
+        Sanbong.name,
+        func.sum(Receipt.price).label('total_revenue')
+    ).join(Receipt, Receipt.sanbong_id == Sanbong.id, isouter=True) \
+        .filter(Receipt.status == 'Đã thanh toán')
+
+    if from_date:
+        query = query.filter(Receipt.created_date >= from_date)
+    if to_date:
+        query = query.filter(Receipt.created_date <= to_date)
+
+    query = query.group_by(Sanbong.id, Sanbong.name)
+
+    return query.all()
