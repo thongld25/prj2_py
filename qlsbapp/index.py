@@ -11,7 +11,6 @@ from werkzeug.security import  check_password_hash, generate_password_hash
 @app.route("/")
 def index():
     kw = request.args.get('keyword')
-    page = request.args.get('page', 1)
     sanbongs = Sanbong.query.filter_by(active = True)
     user = current_user
 

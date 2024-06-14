@@ -1,14 +1,126 @@
 {% extends 'layout/base.html' %}
 
 {% block title %}Đơn đặt sân đang chờ xác nhận{% endblock %}
+{% block css %}
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+    }
+
+    .navbar {
+        background-color: #343a40;
+        padding: 1rem;
+    }
+
+    .navbar a {
+        color: #fff;
+        margin-right: 1rem;
+        text-decoration: none;
+    }
+
+    .navbar a:hover {
+        text-decoration: underline;
+    }
+
+    h1 {
+        text-align: center;
+        margin: 2rem 0;
+        color: #333;
+    }
+
+    .table-responsive-sm {
+        margin: 2rem;
+        background-color: #fff;
+        padding: 1rem;
+        border-radius: 0.25rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+
+    .table {
+        width: 100%;
+        margin-bottom: 1rem;
+        color: #212529;
+        background-color: transparent;
+        border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.75rem;
+        vertical-align: top;
+        border-top: 1px solid #dee2e6;
+        text-align: left;
+    }
+
+    .table thead th {
+        vertical-align: bottom;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .table tbody + tbody {
+        border-top: 2px solid #dee2e6;
+    }
+
+    .table-bordered {
+        border: 1px solid #dee2e6;
+    }
+
+    .table-bordered th,
+    .table-bordered td {
+        border: 1px solid #dee2e6;
+    }
+
+    .table-bordered thead th,
+    .table-bordered thead td {
+        border-bottom-width: 2px;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .table .thead-dark th {
+        color: #fff;
+        background-color: #343a40;
+        border-color: #454d55;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        border-radius: 0.2rem;
+    }
+
+    @media (max-width: 767px) {
+        .table-responsive-sm {
+            margin: 1rem;
+            padding: 0.5rem;
+        }
+    }
+
+</style>
+{% endblock %}
 
 {% block content %}
 
-
 <h1>Đơn đặt sân đang chờ xác nhận</h1>
 <div class="table-responsive-sm">
-    <table class="table table-bordered">
-        <thead>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-dark">
             <tr>
                 <th>Tên sân</th>
                 <th>Giá</th>
@@ -17,8 +129,7 @@
                 <th>Địa chỉ</th>
                 <th>Thời gian trận đấu</th>
                 <th>Thời gian đặt sân</th>
-                <th>Trạng thái</th>
-<!--                <th>Hành động</th>-->
+                <th>Hành động</th>
             </tr>
         </thead>
         <tbody>
@@ -39,8 +150,8 @@
                         </form>
                     </td>
                 </tr>
-                {% endif %}
-            {% endfor %}
+            {% endif %}
+        {% endfor %}
         </tbody>
     </table>
 </div>

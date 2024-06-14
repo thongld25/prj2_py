@@ -70,35 +70,6 @@ class HomeAdminView(AdminIndexView):
 
         return jsonify(data)
 
-    @expose('/thongke', methods=['POST'])
-    def thongke(self):
-        print(func.count(Sanbong.type_pitch))
-        if not current_user.is_authenticated:
-            return redirect(url_for('admin_signin'))
-
-        data = request.get_json()
-        time_period = data.get('thoigianthongke')
-        san_bong_id = data.get('san_bong')
-
-        query = Receipt.query.filter_by(status='Đã thanh toán')
-
-        if san_bong_id != 'all':
-            query = query.filter_by(sanbong_id=san_bong_id)
-
-        if time_period == 'day':
-            query = query.filter(func.date(Receipt.created_date) == func.current_date())
-        elif time_period == 'week':
-            query = query.filter(func.date(Receipt.created_date) >= func.current_date() - timedelta(days=7))
-        elif time_period == 'month':
-            query = query.filter(func.date(Receipt.created_date) >= func.current_date() - timedelta(days=30))
-        elif time_period == 'year':
-            query = query.filter(func.date(Receipt.created_date) >= func.current_date() - timedelta(days=365))
-
-        total_revenue = 0
-        for receipt in query:
-            total_revenue += receipt.sanbong.price
-
-        return jsonify(total_revenue=total_revenue)
 
     @expose('/revenue_data', methods=['GET'])
     def revenue_data(self):
@@ -199,6 +170,30 @@ class UserView(BaseView):
             sanbongs.append(sanbong)
 
         return self.render('admin/profile_user.html', receipts=receipts, user=user, sanbongs=sanbongs)
+
+    @expose('/black-list')
+    def blacklist(self):
+        subquery = db.session.query(
+            Receipt.user_id,
+            func.count(Receipt.id).label('bung_count')
+        ).filter(
+            Receipt.status == 'Bùng'
+        ).group_by(
+            Receipt.user_id
+        ).subquery()
+
+        # Tạo truy vấn để lấy thông tin người dùng có số lượng biên lai 'Bùng' >= 5
+        query = db.session.query(
+            User,
+            subquery.c.bung_count
+        ).join(
+            subquery,
+            User.id == subquery.c.user_id
+        ).filter(
+            subquery.c.bung_count >= 5
+        ).all()
+
+        return self.render('admin/blacklist.html', users=query)
 
     def is_accessible(self):
         return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN

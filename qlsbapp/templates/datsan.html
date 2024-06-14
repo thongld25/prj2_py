@@ -2,6 +2,125 @@
 
 {% block title %}Trang chủ{% endblock %}
 
+{% block css %}
+<style>
+        body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+    }
+
+    .navbar {
+        background-color: #343a40;
+        padding: 1rem;
+    }
+
+    .navbar a {
+        color: #fff;
+        margin-right: 1rem;
+        text-decoration: none;
+    }
+
+    .navbar a:hover {
+        text-decoration: underline;
+    }
+
+    .subject {
+        text-align: center;
+        margin: 2rem 0;
+        color: #333;
+    }
+
+    .container {
+        padding: 2rem;
+    }
+
+    .card {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+        background-color: #fff;
+        margin-bottom: 2rem;
+        padding: 1rem;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+
+    .card-text {
+        margin-bottom: 0.5rem;
+        color: #666;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    input[type="date"],
+    select,
+    input[type="submit"] {
+        width: 100%;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+    }
+
+    input[type="submit"] {
+        background-color: #007bff;
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    input[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+
+    .alert {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid transparent;
+        border-radius: 5px;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+
+    .footer {
+        background-color: #e9ecef;
+        padding: 1rem;
+        text-align: center;
+        color: #6c757d;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+    }
+
+    @media (max-width: 767px) {
+        .card-title {
+            font-size: 1.25rem;
+        }
+    }
+
+</style>
+{% endblock %}
+
 {% block content %}
 {% if err_msg %}
 <div class="alert alert-danger">

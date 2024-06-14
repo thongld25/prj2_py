@@ -2,6 +2,110 @@
 
 {% block title %}Lịch sử đặt sân{% endblock %}
 
+{% block css %}
+<style>
+        body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+    }
+
+    .navbar {
+        background-color: #343a40;
+        padding: 1rem;
+    }
+
+    .navbar a {
+        color: #fff;
+        margin-right: 1rem;
+        text-decoration: none;
+    }
+
+    .navbar a:hover {
+        text-decoration: underline;
+    }
+
+    h1 {
+        text-align: center;
+        margin: 2rem 0;
+        color: #333;
+    }
+
+    .table-responsive-sm {
+        margin: 2rem;
+    }
+
+    .table {
+        width: 100%;
+        margin-bottom: 1rem;
+        color: #212529;
+        background-color: transparent;
+        border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.75rem;
+        vertical-align: top;
+        border-top: 1px solid #dee2e6;
+        text-align: left;
+    }
+
+    .table thead th {
+        vertical-align: bottom;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .table tbody + tbody {
+        border-top: 2px solid #dee2e6;
+    }
+
+    .table-bordered {
+        border: 1px solid #dee2e6;
+    }
+
+    .table-bordered th,
+    .table-bordered td {
+        border: 1px solid #dee2e6;
+    }
+
+    .table-bordered thead th,
+    .table-bordered thead td {
+        border-bottom-width: 2px;
+    }
+
+    .text-warning {
+        color: #ffc107 !important;
+    }
+
+    .text-success {
+        color: #28a745 !important;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+    }
+
+    .footer {
+        background-color: #e9ecef;
+        padding: 1rem;
+        text-align: center;
+        color: #6c757d;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+    }
+
+    @media (max-width: 767px) {
+        .table-responsive-sm {
+            margin: 1rem;
+        }
+    }
+
+</style>
+{% endblock %}
+
 {% block content %}
 
 

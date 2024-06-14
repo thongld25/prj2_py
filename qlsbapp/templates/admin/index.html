@@ -1,57 +1,87 @@
 {% extends 'admin/base.html' %}
 
+{% block head %}
+<style>
+    .centered-heading {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .chart-container {
+        padding: 20px;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        background-color: #ffffff;
+        margin-bottom: 20px;
+    }
+
+    .chart-container i {
+        display: block;
+        margin-top: 10px;
+        color: #6c757d;
+    }
+
+    .form-container {
+        padding: 20px;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        font-weight: bold;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+    }
+</style>
+{% endblock %}
+
 {% block body %}
 {% if current_user.is_authenticated %}
-<div>
-    <canvas id="thongkedoanhthu"></canvas>
-    <div style="display: flex; justify-content: center;">
-        <i>Biểu đồ thống kê doanh thu trong năm</i>
-    </div>
-</div>
-<div class="container mt-5">
-    <div class="row mb-3">
-        <div class="col-sm-3">
-            <label for="thoigianthongke">Chọn thời gian:</label>
-            <select id="thoigianthongke" name="thoigianthongke">
-                <option value="day">Theo ngày</option>
-                <option value="week">Theo tuần</option>
-                <option value="month">Theo tháng</option>
-                <option value="year">Theo năm</option>
-            </select>
+<h3 class="centered-heading">Thống kê doanh thu</h3>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <canvas id="thongkedoanhthu"></canvas>
+                <i>Biểu đồ thống kê doanh thu các tháng trong năm</i>
+            </div>
         </div>
-        <div class="col-sm-4">
-            <label for="san_bong">Chọn sân bóng:</label>
-            <select id="san_bong" name="san_bong">
-                <option value="all">Tất cả sân bóng</option>
-                {% for s in sanbongs %}
-                <option value="{{ s.id }}">{{ s.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-sm-2 align-self-end">
-            <button id="btn-thongke" class="btn btn-primary">Thống kê</button>
-        </div>
-    </div>
-    <div id="thongke-result">
-        <!-- Kết quả thống kê sẽ được hiển thị tại đây -->
-    </div>
-</div>
-<div>
-    <h3>Chọn khoảng thời gian:</h3>
-    <form id="dateForm">
-        <div class="form-group">
-            <label for="startDate">Ngày bắt đầu:</label>
-            <input type="date" class="form-control" id="startDate" name="startDate" required>
-        </div>
-        <div class="form-group">
-            <label for="endDate">Ngày kết thúc:</label>
-            <input type="date" class="form-control" id="endDate" name="endDate" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Xem thống kê</button>
-    </form>
-    <canvas id="thongkedoanhthu1" style="margin-top: 20px;"></canvas>
-</div>
 
+        <div class="col-md-6">
+            <div class="form-container">
+                <form id="dateForm">
+                    <div class="form-group">
+                        <label for="startDate">Ngày bắt đầu:</label>
+                        <input type="date" class="form-control" id="startDate" name="startDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">Ngày kết thúc:</label>
+                        <input type="date" class="form-control" id="endDate" name="endDate" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Xem thống kê</button>
+                </form>
+            </div>
+            <div class="chart-container">
+                <canvas id="thongkedoanhthu1"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
 {% else %}
 <h1 class="text-center text-danger">Đăng nhập quản trị</h1>
 <form method="post" action="{{ url_for('admin_signin') }}">
@@ -114,34 +144,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 </script>
 <script>
-document.getElementById('btn-thongke').addEventListener('click', function() {
-    const thoigianthongke = document.getElementById('thoigianthongke').value;
-    const san_bong = document.getElementById('san_bong').value;
-
-    fetch('/admin/thongke', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            thoigianthongke: thoigianthongke,
-            san_bong: san_bong
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        const resultDiv = document.getElementById('thongke-result');
-        resultDiv.innerHTML = `<div class="alert alert-info">Tổng doanh thu: ${data.total_revenue} VND</div>`;
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-});
-</script>
-<script>
     document.addEventListener('DOMContentLoaded', function () {
         const ctx = document.getElementById('thongkedoanhthu1').getContext('2d');
         const dateForm = document.getElementById('dateForm');
+        let revenueChart; // Declare the chart instance variable
 
         dateForm.addEventListener('submit', function (event) {
             event.preventDefault();
@@ -155,26 +161,34 @@ document.getElementById('btn-thongke').addEventListener('click', function() {
                         const labels = data.map(item => item.sanbong);
                         const totalSales = data.map(item => item.total_sales);
 
-                        new Chart(ctx, {
-                            type: 'bar',
-                            data: {
-                                labels: labels,
-                                datasets: [{
-                                    label: 'Doanh thu',
-                                    data: totalSales,
-                                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                                    borderColor: 'rgba(75, 192, 192, 1)',
-                                    borderWidth: 1
-                                }]
-                            },
-                            options: {
-                                scales: {
-                                    y: {
-                                        beginAtZero: true
+                        if (revenueChart) {
+                            // Update the existing chart data
+                            revenueChart.data.labels = labels;
+                            revenueChart.data.datasets[0].data = totalSales;
+                            revenueChart.update();
+                        } else {
+                            // Create a new chart if it doesn't exist
+                            revenueChart = new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: labels,
+                                    datasets: [{
+                                        label: 'Doanh thu',
+                                        data: totalSales,
+                                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                        borderColor: 'rgba(75, 192, 192, 1)',
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true
+                                        }
                                     }
                                 }
-                            }
-                        });
+                            });
+                        }
                     })
                     .catch(error => console.error('Error fetching sales data:', error));
             } else {
