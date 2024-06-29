@@ -1,19 +1,25 @@
 {% extends 'admin/base.html' %}
 
+
+
 {% block body %}
 {% if current_user.is_authenticated %}
-<div class="row">
-  <div class="col-sm-4">
-      <h4>Thông tin người dùng</h4>
-  </div>
-  <div class="col-sm-8">
-      <br>
-      <p>Họ tên: {{ user.name }}</p>
-      <p>Tài khoản: {{ user.username }}</p>
-      <p>Email: {{ user.email }}</p>
-      <p>Số điện thoại: {{ user.phone }}</p>
-      <p>Ngày tạo: {{ user.joined_date }}</p>
-  </div>
+<div class="container">
+<!--    <h4>Thông tin người dùng</h4>-->
+    <div class="row user-info">
+      <div class="col-sm-4 text-center">
+          <h4>Thông tin người dùng</h4>
+          <img src="{{ current_user.avatar }}" alt="Ảnh đại diện" class="img-fluid">
+          <p><strong>{{ user.name }}</strong> </p>
+      </div>
+      <div class="col-sm-8">
+          <br>
+          <p><strong>Tài khoản:</strong> {{ user.username }}</p>
+          <p><strong>Email:</strong> {{ user.email }}</p>
+          <p><strong>Số điện thoại:</strong> {{ user.phone }}</p>
+          <p><strong>Ngày tạo:</strong> {{ user.joined_date }}</p>
+      </div>
+    </div>
 </div>
 <h4>Lịch sử đặt sân</h4>
         <div class="table-responsive-sm">
@@ -31,16 +37,22 @@
                 <tbody>
                     {% for r in receipts %}
                     <tr>
-                        {% set sanbong = sanbongs[r.sanbong_id] %}
+                        {% set sanbong = sanbongs.get(r.sanbong_id) %}
+                        {% if sanbong %}
                         <td>{{ sanbong.name }}</td>
                         <td>{{ sanbong.price }}</td>
                         <td>{{ sanbong.address }}</td>
                         <td>{{ r.time_frame }} {{ r.time_play }}</td>
                         <td>{{ r.created_date }}</td>
-                        <td class="{% if r.status == 'Chờ xác nhận' %}text-warning{% elif r.status == 'Đặt thành công' %}text-success{% elif r.status == 'Đã bị hủy' %}text-danger{% endif %}">
+                        <td class="{% if r.status == 'Chờ xác nhận' %}text-warning{% elif r.status == 'Đặt thành công' or r.status == 'Đã thanh toán' %}text-success{% elif r.status == 'Đã bị hủy' or r.status == 'Đã hủy' or r.status == 'Bùng' %}text-danger{% endif %}">
                             {{ r.status }}
                         </td>
                     </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="8">Thông tin sân không hợp lệ</td>
+                            </tr>
+                        {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
@@ -60,5 +72,25 @@
 </form>
 
 {% endif %}
+  <style>
+    .user-info {
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .user-info img {
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+    }
+
+    .user-info h4 {
+        color: #007bff;
+    }
+  </style>
 {% endblock %}
 

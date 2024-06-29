@@ -5,7 +5,7 @@ import cloudinary.uploader
 from flask_login import login_user, logout_user, current_user
 from qlsbapp.models import UserRole, Sanbong, User, Receipt
 from werkzeug.security import  check_password_hash, generate_password_hash
-
+from sqlalchemy import or_
 
 
 @app.route("/")
@@ -13,11 +13,7 @@ def index():
     kw = request.args.get('keyword')
     sanbongs = Sanbong.query.filter_by(active = True)
     user = current_user
-
-
     return render_template('index.html', sanbongs=sanbongs, user =user)
-
-
 @app.route('/register', methods=['GET', 'POST'])
 def user_register():
     err_msg = ""
@@ -25,7 +21,6 @@ def user_register():
     email = ""
     phone = ""
     username = ""
-
     if request.method == 'POST':
         name = request.form.get('name')
         email = request.form.get('email')
@@ -34,7 +29,6 @@ def user_register():
         password = request.form.get('password')
         confirm = request.form.get('confirm')
         avatar_path = None
-
         try:
             if User.query.filter(User.email == email).first() is None:
                 if User.query.filter(User.phone == phone).first() is None:
@@ -60,27 +54,20 @@ def user_register():
                 err_msg = 'Email đã tồn tại'
         except Exception as ex:
             err_msg = 'Hệ thống có lỗi' + str(ex)
-
     return render_template('register.html', err_msg=err_msg, name=name, email=email, phone=phone, username=username)
-
-
 @app.route('/user_login', methods=['get', 'post'])
 def user_signin():
     err_msg = ''
     if request.method.__eq__('POST'):
         username = request.form.get('username')
         password = request.form.get('password')
-
         user = utils.check_login(username=username, password=password, role=UserRole.USER)
         if user:
             login_user(user=user)
             return redirect(url_for('index'))
         else:
             err_msg = 'Tài khoản hoặc mật khẩu không chính xác'
-
     return render_template('login.html', err_msg=err_msg)
-
-
 @app.route('/admin_signin', methods=['POST'])
 def admin_signin():
         # if not current_user.user_role == UserRole.ADMIN:
@@ -88,15 +75,10 @@ def admin_signin():
         print("Request method:", request.method)
         username = request.form['username']
         password = request.form['password']
-
         user = utils.check_login(username=username, password=password, role=UserRole.ADMIN)
         if user:
             login_user(user=user)
-
         return redirect('/admin')
-
-
-
 @app.route('/datsan/<int:sb_id>', methods=['get', 'post'])
 def datsan(sb_id):
     user = current_user
@@ -123,52 +105,33 @@ def datsan(sb_id):
             err_msg = 'Hệ thống có lỗi' + str(ex)
 
     return render_template('datsan.html', sanbong_id=sanbong_id, err_msg=err_msg)
-
-
 @login_manager.user_loader
 def user_load(user_id):
     return utils.get_user_by_id(user_id=user_id)
-
 @app.route('/user_logout')
 def user_signout():
     logout_user()
     return redirect(url_for('user_signin'))
-
 @app.route('/lich_su', methods=['get'])
 def lich_su():
     user_id = current_user.id
     receipts = utils.load_receipt(user_id)
-    sanbongs = []
+    sanbongs = {}
     for r in receipts:
         sanbong = utils.get_sanbong_by_id(r.sanbong_id)
-        sanbongs.append(sanbong)
-
+        if sanbong:
+            sanbongs[r.sanbong_id] = sanbong
     return render_template('lich_su.html', receipts=receipts, sanbongs=sanbongs)
-
-@app.route('/wait_confirm', methods=['get', 'post'])
+@app.route('/wait_confirm', methods=['GET', 'POST'])
 def wait_confirm():
     user_id = current_user.id
     receipts = utils.load_receipt(user_id)
-    # for receipt in receipts:
-    #     print(receipt.user_id)
-    # sanbong_id = receipt.sanbong_id
-    # print(receipt)
-    # sanbong = utils.get_sanbong_by_id(sanbong_id)
-    sanbongs = []
+    sanbongs = {}
     for r in receipts:
         sanbong = utils.get_sanbong_by_id(r.sanbong_id)
-        sanbongs.append(sanbong)
-    # sanbong = utils.load_sanbongs()
-
-    # if 'cancel' in request.args:
-    #     receipt_id = request.args.get('cancel')
-    #     receipt = Receipt.query.get_or_404(receipt_id)
-    #     receipt.status = 'Đã bị hủy'
-    #     db.session.commit()
-    #     flash('Đơn hàng đã được hủy thành công.', 'success')
-
+        if sanbong:
+            sanbongs[r.sanbong_id] = sanbong
     return render_template('wait_confirm.html', receipts=receipts, sanbongs=sanbongs)
-
 @app.route('/cancel/<int:receipt_id>', methods=['POST'])
 def cancel(receipt_id):
         receipt = Receipt.query.get_or_404(receipt_id)
@@ -176,14 +139,10 @@ def cancel(receipt_id):
         db.session.commit()
         flash('Đã hủy đặt sân thành công')
         return redirect(url_for('wait_confirm'))
-
-
-
 @app.route("/sanbong")
 def sanbong_list():
     sanbong = utils.load_sanbongs()
     return render_template('sanbong.html', sanbong=sanbong)
-
 @app.route('/profile', methods=['GET', 'POST'])
 def edit_profile():
     user = current_user
@@ -193,7 +152,6 @@ def edit_profile():
         email = request.form.get('email')
         phone = request.form.get('phone')
         username = request.form.get('username')
-
         try:
             if User.query.filter(User.email == email).first() is None or user.email == email:
                 if User.query.filter(User.phone == phone).first() is None or user.phone == phone:
@@ -206,15 +164,14 @@ def edit_profile():
                         flash('Đã chỉnh sửa thông tin thành công!', 'success')
                         return redirect(url_for('edit_profile'))
                     else:
-                        err_msg = 'Tên tài khoản đã tồn tại'
+                        flash('Tên tài khoản đã tồn tại!!!', 'error')
                 else:
-                    err_msg = 'Số điện thoại đã tồn tại'
+                    flash('Số điện thoại đã tồn tại!!!', 'error')
             else:
-                err_msg = 'Email đã tồn tại'
+                flash('Email đã tồn tại!!!', 'error')
         except Exception as ex:
             err_msg = 'Hệ thống có lỗi: ' + str(ex)
             flash(err_msg, 'danger')
-
     return render_template('edit_profile.html', user=user)
 
 @app.route('/change_password', methods= ['get', 'post'])
@@ -240,7 +197,6 @@ def change_password():
         else:
             err_msg = 'Mật khẩu hiện tại không đúng!'
         flash(err_msg, 'error')
-
     return render_template('change_password.html', user=user)
 
 

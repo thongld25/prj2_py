@@ -175,4 +175,9 @@
 {% else %}
 <p><i>Không có sân bóng nào!!!!</i></p>
 {% endif %}
+<script>
+    // Lấy phần tử input
+    var today = new Date().toISOString().split('T')[0];
+    document.getElementById("time_play").setAttribute('min', today);
+</script>
 {% endblock %}

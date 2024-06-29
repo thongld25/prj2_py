@@ -56,13 +56,6 @@
 <div class="container">
     <div class="row">
         <div class="col-md-6">
-            <div class="chart-container">
-                <canvas id="thongkedoanhthu"></canvas>
-                <i>Biểu đồ thống kê doanh thu các tháng trong năm</i>
-            </div>
-        </div>
-
-        <div class="col-md-6">
             <div class="form-container">
                 <form id="dateForm">
                     <div class="form-group">
@@ -76,11 +69,21 @@
                     <button type="submit" class="btn btn-primary">Xem thống kê</button>
                 </form>
             </div>
+        </div>
+        <div class="col-md-12">
             <div class="chart-container">
                 <canvas id="thongkedoanhthu1"></canvas>
+                <i>Biểu đồ thống kê doanh thu của các sân</i>
             </div>
         </div>
     </div>
+    <div class="col-md-12">
+        <div class="chart-container">
+            <canvas id="thongkedoanhthu"></canvas>
+            <i>Biểu đồ thống kê doanh thu các tháng trong năm 2024</i>
+        </div>
+    </div>
+
 </div>
 {% else %}
 <h1 class="text-center text-danger">Đăng nhập quản trị</h1>

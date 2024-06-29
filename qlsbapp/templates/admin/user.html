@@ -3,7 +3,17 @@
 {% block body %}
 {% if current_user.is_authenticated %}
 <div class="table-responsive-sm">
-    <h4>Danh sách người dùng</h4>
+<!--    <h4>Danh sách người dùng</h4>-->
+<!--    <h4><a href="{{ url_for('userview.index')}}">Danh sách người dùng</a></h4>-->
+<!--    <h4><a href="{{ url_for('userview.blacklist')}}">Danh sách đen</a></h4>-->
+    <ul class="nav nav-pills">
+      <li class="nav-item">
+        <a class="nav-link active" href="{{ url_for('userview.index')}}">Tất cả</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('userview.blacklist')}}">Danh sách đen</a>
+      </li>
+    </ul>
     <table class="table table-bordered">
         <thead>
             <tr>

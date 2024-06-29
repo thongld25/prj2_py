@@ -3,6 +3,17 @@
 {% block body %}
 {% if current_user.is_authenticated %}
 <div class="table-responsive-sm">
+    <ul class="nav nav-pills">
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('receiptview.all_receipt')}}">Tất cả</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="{{ url_for('receiptview.index')}}">Duyệt đơn</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('receiptview.chuathanhtoan')}}">Thanh toán</a>
+      </li>
+    </ul>
     <table class="table table-bordered table-fixed" width="100%">
         <thead>
             <tr>

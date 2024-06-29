@@ -135,23 +135,31 @@
         <tbody>
         {% for r in receipts %}
             {% if r.status == 'Chờ xác nhận' %}
-                <tr>
-                    {% set sanbong = sanbongs[r.sanbong_id] %}
-                    <td>{{ sanbong.name }}</td>
-                    <td>{{ sanbong.price }}</td>
-                    <td>{{ sanbong.type_pitch }}</td>
-                    <td>{{ sanbong.surface_pitch }}</td>
-                    <td>{{ sanbong.address }}</td>
-                    <td>{{ r.time_frame }} {{ r.time_play }}</td>
-                    <td>{{ r.created_date }}</td>
-                    <td>
-                        <form action="{{ url_for('.cancel', receipt_id=r.id) }}" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-danger btn-sm mx-1" onclick="return confirm('Bạn có chắc chắn muốn hủy đặt sân không?');">Hủy</button>
-                        </form>
-                    </td>
-                </tr>
+                {% set sanbong = sanbongs.get(r.sanbong_id) %}
+                {% if sanbong %}
+                    <tr>
+                        <td>{{ sanbong.name }}</td>
+                        <td>{{ sanbong.price }}</td>
+                        <td>{{ sanbong.type_pitch }}</td>
+                        <td>{{ sanbong.surface_pitch }}</td>
+                        <td>{{ sanbong.address }}</td>
+                        <td>{{ r.time_frame }} {{ r.time_play }}</td>
+                        <td>{{ r.created_date }}</td>
+                        <td>
+                            <form action="{{ url_for('.cancel', receipt_id=r.id) }}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-danger btn-sm mx-1" onclick="return confirm('Bạn có chắc chắn muốn hủy đặt sân không?');">Hủy</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8">Thông tin sân không hợp lệ</td>
+                    </tr>
+                {% endif %}
             {% endif %}
         {% endfor %}
+
+
         </tbody>
     </table>
 </div>

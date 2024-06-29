@@ -127,7 +127,8 @@
         <tbody>
             {% for r in receipts %}
             <tr>
-                {% set sanbong = sanbongs[r.sanbong_id] %}
+                {% set sanbong = sanbongs.get(r.sanbong_id) %}
+                {% if sanbong %}
                 <td>{{ sanbong.name }}</td>
                 <td>{{ sanbong.price }}</td>
                 <td>{{ sanbong.type_pitch }}</td>
@@ -135,10 +136,15 @@
                 <td>{{ sanbong.address }}</td>
                 <td>{{ r.time_frame }} {{ r.time_play }}</td>
                 <td>{{ r.created_date }}</td>
-                <td class="{% if r.status == 'Chờ xác nhận' %}text-warning{% elif r.status == 'Đặt thành công' %}text-success{% elif r.status == 'Đã bị hủy' %}text-danger{% endif %}">
-                    {{ r.status }}
+                <td class="{% if r.status == 'Chờ xác nhận' %}text-warning{% elif r.status == 'Đặt thành công' or r.status == 'Đã thanh toán' %}text-success{% elif r.status == 'Đã bị hủy' or r.status == 'Đã hủy' or r.status == 'Bùng' %}text-danger{% endif %}">
+                    <strong>{{ r.status }}</strong>
                 </td>
             </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8">Thông tin sân không hợp lệ</td>
+                    </tr>
+                {% endif %}
             {% endfor %}
         </tbody>
     </table>

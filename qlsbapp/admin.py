@@ -1,6 +1,7 @@
 from sqlalchemy import Float
 
 from qlsbapp import app, db
+import utils
 from flask_admin import Admin, BaseView, expose, AdminIndexView
 from qlsbapp.models import Sanbong, UserRole, User, Receipt
 from flask_admin.contrib.sqla import ModelView
@@ -39,7 +40,7 @@ class HomeAdminView(AdminIndexView):
     def sales_data(self):
         # Fetch total sales per month
         total_sales_per_month = db.session.query(
-            func.extract('month', Receipt.created_date).label('month'),
+            func.extract('month', Receipt.time_play).label('month'),
             func.sum(Sanbong.price).label('total_sales')
         ).join(Sanbong, Sanbong.id == Receipt.sanbong_id).filter(
             Receipt.status == 'Đã Thanh Toán'
@@ -48,7 +49,7 @@ class HomeAdminView(AdminIndexView):
         # Fetch sales per month for each football field
         sales_per_field_per_month = db.session.query(
             Sanbong.name.label('field_name'),
-            func.extract('month', Receipt.created_date).label('month'),
+            func.extract('month', Receipt.time_play).label('month'),
             func.sum(Sanbong.price).label('field_sales')
         ).join(Sanbong, Sanbong.id == Receipt.sanbong_id).filter(
             Receipt.status == 'Đã Thanh Toán'
@@ -164,10 +165,11 @@ class UserView(BaseView):
     def profile_user(self, u_id):
         user = User.query.get_or_404(u_id)
         receipts = Receipt.query.filter_by(user_id=u_id).all()
-        sanbongs = []
+        sanbongs = {}
         for r in receipts:
-            sanbong = Sanbong.query.get(r.sanbong_id)
-            sanbongs.append(sanbong)
+            sanbong = utils.get_sanbong_by_id(r.sanbong_id)
+            if sanbong:
+                sanbongs[r.sanbong_id] = sanbong
 
         return self.render('admin/profile_user.html', receipts=receipts, user=user, sanbongs=sanbongs)
 
@@ -232,79 +234,107 @@ class ReceiptView(BaseView):
         db.session.commit()
         return redirect(url_for('.index'))
 
-    def is_accessible(self):
-        return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN
-
-class AllReceiptView(BaseView):
-    @expose('/')
-    def index(self):
+    @expose('/all_receipt')
+    def all_receipt(self):
         # receipts = Receipt.query.filter_by(status='Chờ xác nhận').all()
         receipts = Receipt.query.all()
         users = User.query.all()
         sanbongs = Sanbong.query.all()
         return self.render('admin/all_receipt.html', receipts=receipts, sanbongs=sanbongs, users=users)
-    def is_accessible(self):
-        return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN
 
-class ThanhToanView(BaseView):
-    @expose('/')
-    def index(self):
+    @expose('/chuathanhtoan')
+    def chuathanhtoan(self):
         receipts = Receipt.query.filter_by(status='Đặt thành công').all()
         users = User.query.all()
         sanbongs = Sanbong.query.all()
         return self.render('admin/chuathanhtoan.html', receipts=receipts, users=users, sanbongs=sanbongs)
 
-    @expose('/confirm/<int:receipt_id>', methods=['POST'])
-    def confirm(self, receipt_id):
+    @expose('/paid/<int:receipt_id>', methods=['POST'])
+    def paid(self, receipt_id):
         receipt = Receipt.query.get_or_404(receipt_id)
         receipt.status = 'Đã thanh toán'
         db.session.commit()
-        return redirect(url_for('.index'))
+        return redirect(url_for('.chuathanhtoan'))
 
-    @expose('/canceled/<int:receipt_id>', methods=['POST'])
-    def canceled(self, receipt_id):
+    @expose('/notpaid/<int:receipt_id>', methods=['POST'])
+    def notpaid(self, receipt_id):
         receipt = Receipt.query.get_or_404(receipt_id)
         receipt.status = 'Bùng'
         db.session.commit()
-        return redirect(url_for('.index'))
+        return redirect(url_for('.chuathanhtoan'))
 
     def is_accessible(self):
         return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN
 
-class DanhsachdenView(BaseView):
-    @expose('/')
-    def index(self):
-        subquery = db.session.query(
-            Receipt.user_id,
-            func.count(Receipt.id).label('bung_count')
-        ).filter(
-            Receipt.status == 'Bùng'
-        ).group_by(
-            Receipt.user_id
-        ).subquery()
+# class AllReceiptView(BaseView):
+#     @expose('/')
+#     def index(self):
+#         # receipts = Receipt.query.filter_by(status='Chờ xác nhận').all()
+#         receipts = Receipt.query.all()
+#         users = User.query.all()
+#         sanbongs = Sanbong.query.all()
+#         return self.render('admin/all_receipt.html', receipts=receipts, sanbongs=sanbongs, users=users)
+#     def is_accessible(self):
+#         return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN
 
-        # Tạo truy vấn để lấy thông tin người dùng có số lượng biên lai 'Bùng' >= 5
-        query = db.session.query(
-            User,
-            subquery.c.bung_count
-        ).join(
-            subquery,
-            User.id == subquery.c.user_id
-        ).filter(
-            subquery.c.bung_count >= 5
-        ).all()
+# class ThanhToanView(BaseView):
+#     @expose('/')
+#     def index(self):
+#         receipts = Receipt.query.filter_by(status='Đặt thành công').all()
+#         users = User.query.all()
+#         sanbongs = Sanbong.query.all()
+#         return self.render('admin/chuathanhtoan.html', receipts=receipts, users=users, sanbongs=sanbongs)
+#
+#     @expose('/paid/<int:receipt_id>', methods=['POST'])
+#     def paid(self, receipt_id):
+#         receipt = Receipt.query.get_or_404(receipt_id)
+#         receipt.status = 'Đã thanh toán'
+#         db.session.commit()
+#         return redirect(url_for('.index'))
+#
+#     @expose('/notpaid/<int:receipt_id>', methods=['POST'])
+#     def notpaid(self, receipt_id):
+#         receipt = Receipt.query.get_or_404(receipt_id)
+#         receipt.status = 'Bùng'
+#         db.session.commit()
+#         return redirect(url_for('.index'))
+#
+#     def is_accessible(self):
+#         return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN
 
-        return self.render('admin/blacklist.html', users=query)
-
-    def is_accessible(self):
-        return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN
+# class DanhsachdenView(BaseView):
+#     @expose('/')
+#     def index(self):
+#         subquery = db.session.query(
+#             Receipt.user_id,
+#             func.count(Receipt.id).label('bung_count')
+#         ).filter(
+#             Receipt.status == 'Bùng'
+#         ).group_by(
+#             Receipt.user_id
+#         ).subquery()
+#
+#         # Tạo truy vấn để lấy thông tin người dùng có số lượng biên lai 'Bùng' >= 5
+#         query = db.session.query(
+#             User,
+#             subquery.c.bung_count
+#         ).join(
+#             subquery,
+#             User.id == subquery.c.user_id
+#         ).filter(
+#             subquery.c.bung_count >= 5
+#         ).all()
+#
+#         return self.render('admin/blacklist.html', users=query)
+#
+#     def is_accessible(self):
+#         return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN
 
 admin = Admin(app=app, name="Quản lý sân bóng",index_view=HomeAdminView(name='Trang chủ'), template_mode='bootstrap4')
 admin.add_view(UserView(name='Người Dùng'))
 admin.add_view(SanbongView(name='Sân bóng'))
 # admin.add_view(ReceiptView(Receipt, db.session, name='Đơn hàng'))
-admin.add_view(AllReceiptView(name='Tất cả đơn hàng'))
+# admin.add_view(AllReceiptView(name='Tất cả đơn hàng'))
 admin.add_view(ReceiptView(name='Đơn hàng'))
-admin.add_view(ThanhToanView(name='Chưa thanh toán'))
-admin.add_view(DanhsachdenView(name='Danh sách đen'))
+# admin.add_view(ThanhToanView(name='Chưa thanh toán'))
 admin.add_view(LogoutView(name='Đăng xuất'))
